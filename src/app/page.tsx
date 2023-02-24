@@ -136,7 +136,7 @@ export default function Home() {
             </div>
             <div className="wind">
               <h2>Wind Speed</h2>
-              {data.main ? <p>{data.wind.speed.toFixed()}&deg;F</p> : null}
+              {data.main ? <p>{data.wind?.speed.toFixed()}&deg;F</p> : null}
             </div>
           </div>
         )}
