@@ -3,8 +3,24 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaCloud, FaSun, FaCloudSun, FaCloudRain, FaSnowflake } from "react-icons/fa";
 
+type WeatherData = {
+  name?: string;
+  main?: {
+    temp: number;
+    feels_like: number;
+    humidity: number;
+  };
+  weather?: {
+    main: string;
+  }[];
+  wind?: {
+    speed: number;
+  };
+};
+
+
 export default function Home() {
-  const [data, setData] = useState({});
+  const [data, setData] = useState<WeatherData>({});;
   const [location, setLocation] = useState("");
   const [backgroundImage, setBackgroundImage] = useState("");
 
@@ -31,13 +47,13 @@ export default function Home() {
         setLocation(response.data.name);
 
         axios.get(unsplashUrl).then((response) => {
-          setBackgroundImage(response.data.results[0].urls.regular);
+          setBackgroundImage(response.data.results[0]?.urls.regular);
         });
       });
     });
   };
 
-  const searchLocation = (event:any) => {
+  const searchLocation = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       axios.get(url).then((response) => {
         setData(response.data);
@@ -128,19 +144,3 @@ export default function Home() {
     </div>
   );
 }
-
-// const searchLocation = (event: any) => {
-//   if (event.key === "Enter") {
-//     axios.get(url).then((response) => {
-//       setData(response.data);
-//       console.log(response.data);
-//       setLocation("");
-
-//       //
-//       axios.get(unsplashUrl).then((response) => {
-//         setBackgroundImage(response.data.results[0].urls.regular);
-//       });
-//       //
-//     });
-//   }
-// };
