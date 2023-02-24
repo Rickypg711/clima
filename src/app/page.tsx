@@ -37,7 +37,7 @@ export default function Home() {
     });
   };
 
-  const searchLocation = (event) => {
+  const searchLocation = (event:any) => {
     if (event.key === "Enter") {
       axios.get(url).then((response) => {
         setData(response.data);
@@ -57,7 +57,7 @@ export default function Home() {
     backgroundSize: "cover",
   };
   // 
-  const getWeatherIcon = (weatherCondition) => {
+  const getWeatherIcon = (weatherCondition:any) => {
     switch (weatherCondition) {
       case "Clear":
         return <FaSun  className=' text-xl'/>;
