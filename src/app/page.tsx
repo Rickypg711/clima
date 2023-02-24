@@ -1,11 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
-import { IoMdPartlySunny } from "react-icons/io";
 import axios from "axios";
+import { FaCloud, FaSun, FaCloudSun, FaCloudRain, FaSnowflake } from "react-icons/fa";
 
 export default function Home() {
-
-
   const [data, setData] = useState({});
   const [location, setLocation] = useState("");
   const [backgroundImage, setBackgroundImage] = useState("");
@@ -13,36 +11,72 @@ export default function Home() {
   const apiKey = `87e455a72ede06909556a35b713e8890`;
   const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=imperial&appid=${apiKey}`;
 
-  const searchLocation = (event: any) => {
+  const unsplashAccessKey = `M0OH7D48h871fb0jVqbFy8qycRDrD6xC7zSSx6rObDY`;
+  const unsplashUrl = `https://api.unsplash.com/search/photos?page=1&query=${location}&client_id=${unsplashAccessKey}`;
+
+  useEffect(() => {
+    getCurrentLocationWeather();
+  }, []);
+
+  
+
+  const getCurrentLocationWeather = () => {
+    navigator.geolocation.getCurrentPosition((position) => {
+      const { latitude, longitude } = position.coords;
+      const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=imperial&appid=${apiKey}`;
+
+      axios.get(weatherUrl).then((response) => {
+        setData(response.data);
+        console.log(response.data);
+        setLocation(response.data.name);
+
+        axios.get(unsplashUrl).then((response) => {
+          setBackgroundImage(response.data.results[0].urls.regular);
+        });
+      });
+    });
+  };
+
+  const searchLocation = (event) => {
     if (event.key === "Enter") {
       axios.get(url).then((response) => {
         setData(response.data);
         console.log(response.data);
         setLocation("");
+
+        axios.get(unsplashUrl).then((response) => {
+          setBackgroundImage(response.data.results[0].urls.regular);
+        });
       });
     }
   };
-
-  useEffect(() => {
-    const unsplashAccessKey = `M0OH7D48h871fb0jVqbFy8qycRDrD6xC7zSSx6rObDY`;
-    const unsplashUrl = `https://api.unsplash.com/search/photos?page=1&query=${location}&client_id=${unsplashAccessKey}`;
-    
-    
-    axios.get(unsplashUrl).then((response) => {
-      setBackgroundImage(response.data.results[0].urls.regular);
-    });
-  
-  }, [location]);
 
   const backgroundStyle = {
     backgroundImage: `url(${backgroundImage})`,
     backgroundPosition: "center",
     backgroundSize: "cover",
   };
+  // 
+  const getWeatherIcon = (weatherCondition) => {
+    switch (weatherCondition) {
+      case "Clear":
+        return <FaSun  className=' text-xl'/>;
+      case "Clouds":
+        return <FaCloud />;
+      case "Drizzle":
+      case "Rain":
+        return <FaCloudRain />;
+      case "Snow":
+        return <FaSnowflake />;
+      default:
+        return <FaCloudSun/>;
+    }
+  };
+  // 
 
   return (
-    <div   style={backgroundStyle} className=' h-screen'>
-      <main >
+    <div style={backgroundStyle} className=" h-screen">
+      <main>
         <div className="top w-full">
           <div className="title text-center items-center py-7">
             <h1 className="text-7xl text-orange-600">ClimApp</h1>
@@ -61,29 +95,52 @@ export default function Home() {
           <div className=" items-center text-center">
             <p className="text-4xl">{data.name}</p>
 
-            {data.main ? <p>{data.main.temp}</p> : null}
+            {data.main ? <p>{data.main.temp.toFixed()}&deg;F</p> : null}
           </div>
 
           <div className="description ">
             {data.weather ? <p>{data.weather[0].main}</p> : null}
+            {data.weather && data.weather.length > 0 && (
+    <p className=' text-2xl'>{getWeatherIcon(data.weather[0].main)}</p>
+  )}
+          {/* {getWeatherIcon(data.weather[0].main)} */}
+
           </div>
         </div>
 
-        <div className="bottom flex justify-evenly text-center  mx-4 my-auto p-4 border-3 bg-slate-50/50 rounded-3xl">
-          <div className="feelsLike">
-            <h2>Feels Like</h2>
-            {data.main ? <p>{data.main.feels_like}&deg;F</p> : null}
+        {data.name !== undefined && (
+          <div className="bottom flex justify-evenly text-center  mx-4 my-auto p-4 border-3 bg-slate-50/50 rounded-3xl">
+            <div className="feelsLike">
+              <h2>Feels Like</h2>
+              {data.main ? <p>{data.main.feels_like.toFixed()}&deg;F</p> : null}
+            </div>
+            <div className="humidity">
+              <h2>Humidity</h2>
+              {data.main ? <p>{data.main.humidity.toFixed()}%</p> : null}
+            </div>
+            <div className="wind">
+              <h2>Wind Speed</h2>
+              {data.main ? <p>{data.wind.speed.toFixed()}&deg;F</p> : null}
+            </div>
           </div>
-          <div className="humidity">
-            <h2>Humidity</h2>
-            {data.main ? <p>{data.main.humidity}%</p> : null}
-          </div>
-          <div className="wind">
-            <h2>Wind Speed</h2>
-            {data.main ? <p>{data.wind.speed}&deg;F</p> : null}
-          </div>
-        </div>
+        )}
       </main>
     </div>
   );
 }
+
+// const searchLocation = (event: any) => {
+//   if (event.key === "Enter") {
+//     axios.get(url).then((response) => {
+//       setData(response.data);
+//       console.log(response.data);
+//       setLocation("");
+
+//       //
+//       axios.get(unsplashUrl).then((response) => {
+//         setBackgroundImage(response.data.results[0].urls.regular);
+//       });
+//       //
+//     });
+//   }
+// };
